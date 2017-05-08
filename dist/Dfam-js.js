@@ -278,7 +278,7 @@
             var alignEnd;
             if (endMatch.length > 0)
                 alignEnd = aligns[i].alignment.length - endMatch[1].length - 1;
-            for (var j = alignStart; j < alignEnd; j++) {
+            for (var j = alignStart; j <= alignEnd; j++) {
                 var aBase = aligns[i].alignment.substring(j, j + 1);
                 if (colData[j] == null)
                     colData[j] = {};
