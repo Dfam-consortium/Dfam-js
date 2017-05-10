@@ -20,6 +20,9 @@ fs.readFile('example1.stk', 'utf8', function (err,data) {
   out = seedAln.toConsensus();
   console.log("Consensus: " + out );
 
+   
+  var a2m = seedAln.toA2M().alignments;
+
 });
 
 // Procesing a multiple seed-set Stockholm file simply requires

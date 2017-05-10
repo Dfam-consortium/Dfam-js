@@ -405,6 +405,10 @@
         if (stockholmObj == null)
             return;
 
+        var a2mObj = {
+           alignments: []
+        };
+
         // The RF line may already be provided in the stockholm
         // file.
         var RF;
@@ -421,47 +425,65 @@
         }
 
         var aligns = stockholmObj.alignments;
-        var a2m = [];
         var matchColCnt = -1;
         for (var i = 0; i < aligns.length; i++) {
             // Create a copy of the source data
-            a2m[i] = aligns[i].alignment;
+            var a2m_seq = aligns[i].alignment;
 
             // Uppercase all seqs and convert all "-"s to "."s to
             // have a consistent starting point.
-            a2m[i] = a2m[i].toUpperCase();
-            a2m[i] = a2m[i].replace(/-/g, '.');
+            a2m_seq = a2m_seq.toUpperCase();
+            a2m_seq = a2m_seq.replace(/-/g, '.');
+
+            var seqLen = (a2m_seq.match(/[^\.]/g) || []).length;
 
             // Now go over each column in the sequence.
-            for (var j = 0; j < a2m[i].length; j++) {
+            var rfPos = 0;
+            var modelStart = -1;
+            var modelEnd = -1;
+            for (var j = 0; j < a2m_seq.length; j++) {
                 // Get sequence character at this position
-                var base = a2m[i].substring(j, j + 1);
+                var base = a2m_seq.substring(j, j + 1);
                 // Get RF data for this column.
                 var rf = RF.substring(j, j + 1);
                 if (rf == '.') {
                     if (base != '.') {
-                        a2m[i] = a2m[i].substr(0, j) +
+                        a2m_seq = a2m_seq.substr(0, j) +
                             base.toLowerCase() +
-                            a2m[i].substr(j + 1);
+                            a2m_seq.substr(j + 1);
                     }
                 } else {
+                    rfPos++;
                     if (base == '.') {
-                        a2m[i] = a2m[i].substr(0, j) +
+                        a2m_seq = a2m_seq.substr(0, j) +
                             '-' +
-                            a2m[i].substr(j + 1);
+                            a2m_seq.substr(j + 1);
+                    }else {
+                      if (modelStart < 0 )
+                        modelStart = rfPos;
+                      modelEnd = rfPos;
                     }
                 }
             }
             // Remove remaining "."s
-            a2m[i] = a2m[i].replace(/\./g, '');
-            var tmpCnt = (a2m[i].match(/[^A-Z\-]/g) || []).length;
+            a2m_seq = a2m_seq.replace(/\./g, '');
+            var tmpCnt = (a2m_seq.match(/[^A-Z\-]/g) || []).length;
             if (matchColCnt >= 0 && matchColCnt != tmpCnt)
                 throw 'stockholmToA2M: Error converting to A2M format.  The ' +
                     'number of match columns is not consistent ( was ' + matchColCnt +
                     ' and now ' + tmpCnt + ' ).  Here is the offending line:' +
                     aligns[i].alignment;
+            a2mObj.alignments.push({
+                seq_id: aligns[i].seqid,
+                seq_start: aligns[i].start || 1,
+                seq_end: aligns[i].end || seqLen,
+                a2m_seq: a2m_seq,
+                strand: aligns[i].orient || '+',
+                model_start: modelStart,
+                model_end: modelEnd
+            });
         }
-        return a2m;
+        return a2mObj;
     };
 
 
