@@ -2,10 +2,27 @@
 
 ## Introduction
 
-The start of a javascript libray for the Dfam/Dfam_consensus projects.
-It currently contains a class for containing seed alignments.
+A javascript libray for the Dfam/Dfam_consensus projects.
 
-## Usage Example
+ 
+## DfamSeedAlignment
+    
+  A seed alignment is a set of related biological sequences 
+  ( DNA, RNA, Amino Acids ) which have been aligned with respect
+  to each other accounting for subtitions, deletions and insertions.
+  A seed alignment is therefore a form of a sequence multiple
+  alignment.  In Dfam we use seed alignments as the source of data
+  for modeling a DNA sequence family using consensus sequences or
+  as a profile Hidden Markov Model (HMM).  
+
+  A Dfam seed alignment also contains metadata relavant to the
+  family and specific to the domain of Transposable Elements.
+  The object includes a parser for the standard seed alignment
+  file format ( Stockholm ) as well as methods for converting
+  the seed alignment to other formats ( ie. a summary format
+  for visualization, and A2M format for storage in a database ).
+
+### Usage Example
 
 Node:
 
