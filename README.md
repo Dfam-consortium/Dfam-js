@@ -5,7 +5,7 @@
 A javascript libray for the Dfam/Dfam_consensus projects.
 
  
-## DfamSeedAlignment
+### DfamSeedAlignment
     
   A seed alignment is a set of related biological sequences 
   ( DNA, RNA, Amino Acids ) which have been aligned with respect
@@ -22,7 +22,7 @@ A javascript libray for the Dfam/Dfam_consensus projects.
   the seed alignment to other formats ( ie. a summary format
   for visualization, and A2M format for storage in a database ).
 
-### Usage Example
+#### Usage Example
 
 Node:
 
