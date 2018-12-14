@@ -1,13 +1,13 @@
-// 
-//  DfamSeedAlignment 
-//    
-//    A seed alignment is a set of related biological sequences 
+//
+//  DfamSeedAlignment
+//
+//    A seed alignment is a set of related biological sequences
 //    ( DNA, RNA, Amino Acids ) which have been aligned with respect
 //    to each other accounting for subtitions, deletions and insertions.
 //    A seed alignment is therefore a form of a sequence multiple
 //    alignment.  In Dfam we use seed alignments as the source of data
 //    for modeling a DNA sequence family using consensus sequences or
-//    as a profile Hidden Markov Model (HMM).  
+//    as a profile Hidden Markov Model (HMM).
 //
 //    A Dfam seed alignment also contains metadata relavant to the
 //    family and specific to the domain of Transposable Elements.
@@ -17,7 +17,7 @@
 //    for visualization, and A2M format for storage in a database ).
 //
 // Robert Hubley 2017
-//    
+//
 (function(global) {
   'use strict';
 
@@ -352,7 +352,9 @@
             // var consDiNucl = consLeft + consRight;
             var CGScore = 0;
             var dnScore = 0;
-            if (consRight != '') {
+
+            // consRight is undefined once rgtIdx is out of bounds
+            if (consRight !== undefined) {
                 // console.log("consDi = " + consDiNucl);
                 for (var i = 0; i < aligns.length; i++) {
                     var hitLeft = aligns[i].alignment[lftIdx];

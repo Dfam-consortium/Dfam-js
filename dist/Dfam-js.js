@@ -1,3 +1,23 @@
+//
+//  DfamSeedAlignment
+//
+//    A seed alignment is a set of related biological sequences
+//    ( DNA, RNA, Amino Acids ) which have been aligned with respect
+//    to each other accounting for subtitions, deletions and insertions.
+//    A seed alignment is therefore a form of a sequence multiple
+//    alignment.  In Dfam we use seed alignments as the source of data
+//    for modeling a DNA sequence family using consensus sequences or
+//    as a profile Hidden Markov Model (HMM).
+//
+//    A Dfam seed alignment also contains metadata relavant to the
+//    family and specific to the domain of Transposable Elements.
+//    The object includes a parser for the standard seed alignment
+//    file format ( Stockholm ) as well as methods for converting
+//    the seed alignment to other formats ( ie. a summary format
+//    for visualization, and A2M format for storage in a database ).
+//
+// Robert Hubley 2017
+//
 (function(global) {
   'use strict';
 
@@ -6,6 +26,8 @@
     this.alignments = [];
   }
 
+  // Parse a Dfam specific stockholm file ( e.g. standard stockholm multiple
+  // alignment with optional Dfam specific annotation fields ).
   DfamSeedAlignment.prototype.parseStockholm = function (textData) {
         if (textData == null)
             return;
@@ -56,7 +78,7 @@
     //   start = end ( orientation can only be determined by referencing the source seq )
     DfamSeedAlignment.prototype.toAlignmentSummary = function () {
         var stockholmObj = this;
-        var consensus = this.generateConsensusFromAlignment2();
+        var consensus = this.generateConsensusFromAlignment();
         var aligns = stockholmObj.alignments;
         var windowSize = 10;
 
@@ -125,7 +147,7 @@
                 alignEnd = aligns[i].alignment.length - endMatch[1].length - 1;
             // For each column where consensus contains a base
             for (var j = 0; j <= alignEnd; j++) {
-                var cBase = consensus.substring(j, j + 1);
+                var cBase = consensus[j];
                 if (cBase != '.') {
                     consPos++;
                 }
@@ -137,7 +159,7 @@
                 if (conStart == 0)
                     conStart = consPos;
 
-                var aBase = aligns[i].alignment.substring(j, j + 1);
+                var aBase = aligns[i].alignment[j];
                 if (cBase == '.') {
                     if (aBase != '.')
                         ins = ins + 1;
@@ -196,7 +218,7 @@
         var colData = [];
         for (var i = 0; i < aligns.length; i++) {
             for (var j = 0; j < aligns[i].alignment.length; j++) {
-                var aBase = aligns[i].alignment.substring(j, j + 1);
+                var aBase = aligns[i].alignment[j];
                 if (colData[j] == null)
                     colData[j] = {};
                 if (aBase != '.') {
@@ -208,7 +230,7 @@
         }
         var consensus = '';
         for (var j = 0; j < rfData.length; j++) {
-            if (rfData.substring(j, j + 1) == 'x') {
+            if (rfData[j] == 'x') {
                 var highCount = 0;
                 var highBase = '';
                 Object.keys(colData[j]).forEach(function(aBase) {
@@ -227,7 +249,7 @@
     //   Correct for missed CpG calls.  Note: The correction currently
     //   assumes a AT bias in the genome ( good for mammals ) in the
     //   hardcoded lineup matrix.
-    DfamSeedAlignment.prototype.generateConsensusFromAlignment2 = function(stockholmObj) {
+    DfamSeedAlignment.prototype.generateConsensusFromAlignment = function(stockholmObj) {
         var stockholmObj = this;
         //
         // This is what boosts the value of the CG
@@ -279,7 +301,7 @@
             if (endMatch.length > 0)
                 alignEnd = aligns[i].alignment.length - endMatch[1].length - 1;
             for (var j = alignStart; j <= alignEnd; j++) {
-                var aBase = aligns[i].alignment.substring(j, j + 1);
+                var aBase = aligns[i].alignment[j];
                 if (colData[j] == null)
                     colData[j] = {};
                 if (colData[j][aBase] == null)
@@ -326,15 +348,17 @@
             var rgtIdx = diRE.lastIndex;
             var lftIdx = rgtIdx - matches[2].length - 1;
             var consLeft = matches[1];
-            var consRight = consensus.substring(rgtIdx, rgtIdx + 1);
+            var consRight = consensus[rgtIdx];
             // var consDiNucl = consLeft + consRight;
             var CGScore = 0;
             var dnScore = 0;
-            if (consRight != '') {
+
+            // consRight is undefined once rgtIdx is out of bounds
+            if (consRight !== undefined) {
                 // console.log("consDi = " + consDiNucl);
                 for (var i = 0; i < aligns.length; i++) {
-                    var hitLeft = aligns[i].alignment.substring(lftIdx, lftIdx + 1);
-                    var hitRight = aligns[i].alignment.substring(rgtIdx, rgtIdx + 1);
+                    var hitLeft = aligns[i].alignment[lftIdx];
+                    var hitRight = aligns[i].alignment[rgtIdx];
                     if (hitLeft == '.' || hitRight == '.')
                         continue;
                     var hitDiNucl = hitLeft + hitRight;
@@ -420,7 +444,7 @@
         // insertions by generating a consensus for the
         // multiple alignment.
         if (RF == null) {
-            var cons = this.generateConsensusFromAlignment2();
+            var cons = this.generateConsensusFromAlignment();
             RF = cons.replace(/[^\.]/g, 'X');
         }
 
@@ -443,9 +467,9 @@
             var modelEnd = -1;
             for (var j = 0; j < a2m_seq.length; j++) {
                 // Get sequence character at this position
-                var base = a2m_seq.substring(j, j + 1);
+                var base = a2m_seq[j];
                 // Get RF data for this column.
-                var rf = RF.substring(j, j + 1);
+                var rf = RF[j];
                 if (rf == '.') {
                     if (base != '.') {
                         a2m_seq = a2m_seq.substr(0, j) +
